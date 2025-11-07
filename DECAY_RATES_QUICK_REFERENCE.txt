@@ -1,0 +1,124 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    FINAL DECAY RATES - QUICK REFERENCE                       ║
+║                         Based on 21 Tracks Analyzed                          ║
+║                       Weighted by Peak Revenue (Nov 2025)                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ BRAZILIAN FUNK                                                               │
+│   Monthly Decay: 15.0%                                                       │
+│   12-Month Decline: 86%                                                      │
+│   Tracks: ELA JOGA NA HORA (82% weight), BIKE (18% weight)                  │
+│   Confidence: MODERATE (only 2 tracks)                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PHONK                                                                        │
+│   Monthly Decay: 9.0%                                                        │
+│   12-Month Decline: 67%                                                      │
+│   Tracks: 11 analyzed (COLLAR 42% weight, others 2-10% each)                │
+│   Confidence: HIGH (comprehensive data)                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ELECTRONIC                                                                   │
+│   Monthly Decay: 2.5%                                                        │
+│   12-Month Decline: 26%                                                      │
+│   Tracks: PARADISE (70% weight), WARM THE ROOM, SOFIAHOUSE, LUMINESCENT     │
+│   Confidence: HIGH (PARADISE very stable, WARM 16 months data)              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ HIP-HOP (Estimated)                                                          │
+│   Monthly Decay: 9.0%                                                        │
+│   12-Month Decline: 67%                                                      │
+│   Note: Same as Phonk (no Hip-Hop tracks in portfolio)                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ POP (Estimated)                                                              │
+│   Monthly Decay: 7.0%                                                        │
+│   12-Month Decline: 57%                                                      │
+│   Note: Between Phonk and Electronic (1 track: HOVEDPINE, insufficient data)│
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ HOUSE (Estimated)                                                            │
+│   Monthly Decay: 3.0%                                                        │
+│   12-Month Decline: 31%                                                      │
+│   Note: Slightly higher than Electronic (club play factor)                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TECHNO (Estimated)                                                           │
+│   Monthly Decay: 3.0%                                                        │
+│   12-Month Decline: 31%                                                      │
+│   Note: Similar to House (underground stability)                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DRUM & BASS (Estimated)                                                      │
+│   Monthly Decay: 2.5%                                                        │
+│   12-Month Decline: 26%                                                      │
+│   Note: Same as Electronic (dedicated fanbase)                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                             KEY TAKEAWAYS                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✓ Electronic tracks have EXCEPTIONAL longevity (26% decline @ 12m)
+  → PARADISE: Only 5% decline over 4 months!
+  → Best for long-term catalog value
+
+✓ Phonk is more stable than expected (67% decline @ 12m)
+  → COLLAR dominates with stable 5.7% monthly decay
+  → Most tracks cluster around 4-6% decay
+
+✓ Brazilian Funk has faster decay (86% decline @ 12m)  
+  → ELA JOGA: 74% decline over 11 months (11.5% monthly)
+  → Higher peaks but faster drops
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        INVESTMENT IMPLICATIONS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Example: 10,000 daily Spotify streams, 100k DKK investment
+
+                    36-Month Revenue    ROI     Break-even
+Brazilian Funk         ~290k DKK       190%     10 months
+Phonk                  ~340k DKK       240%     8 months  
+Electronic             ~420k DKK       320%     6 months
+
+→ Electronic tracks earn 45% MORE than Brazilian Funk over 3 years!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          WHAT WE DID NOT CHANGE                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✗ Spotify price per stream rates - UNCHANGED
+✗ Revenue split (55% Spotify, 45% other) - UNCHANGED  
+✗ Dashboard layout and design - UNCHANGED
+✗ Country-specific streaming rates - UNCHANGED
+✗ All other predictor functionality - UNCHANGED
+
+ONLY CHANGED: Monthly decay rates for each genre
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            METHODOLOGY NOTES                                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+• Analyzed 21 tracks with 3+ months of post-peak data
+• Weighted by peak revenue (big tracks = more influence)
+• Used exponential decay formula: r = 1 - (remaining)^(1/months)
+• Based on ACTUAL REVENUE (DKK), not streaming numbers
+• Validated predictions against actual track performance
+
+══════════════════════════════════════════════════════════════════════════════
+
+Files ready:
+  → predictoren_final.html (updated predictor tool)
+  → FINAL_DECAY_RATE_MODEL.txt (comprehensive analysis)
+  → comprehensive_decay_analysis.py (full source code)
+
+Last updated: November 7, 2025
