@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictoren - Music Track Profitability Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { margin: 0; background: linear-gradient(135deg, #22c55e 0%, #15803d 25%, #166534 50%, #14532d 75%, #052e16 100%); min-height: 100vh; overflow-x: hidden; padding-bottom: 40px; }
+        .animated-bg { background: linear-gradient(-45deg, #22c55e, #15803d, #16a34a, #059669); background-size: 400% 400%; animation: gradient 15s ease infinite; }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .glass-strong { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); }
+        .btn-primary { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); transition: all 0.3s ease; }
+        .btn-primary:hover { background: linear-gradient(135deg, #16a34a 0%, #166534 100%); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); }
+        .metric-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); transition: all 0.3s ease; text-align: center; }
+        .metric-card:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-2px); }
+        .input-field { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; }
+        .input-field:focus { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.4); outline: none; }
+        .market-tag { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); transition: all 0.3s ease; }
+        .section-divider { height: 2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); margin: 2rem 0; }
+        .loading-spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid white; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 0; font-size: 12px; text-align: center; color: rgba(255, 255, 255, 0.4); }
+        .table-row:hover { background: rgba(255, 255, 255, 0.05); }
+        .progress-bar { background: linear-gradient(90deg, #22c55e, #15803d, #16a34a); }
+        .glow-text { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+        .floating-icon { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .status-badge { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    </style>
+</head>
+<body class="animated-bg min-h-screen">
+    <div class="relative z-10">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="text-center mb-12">
+                <div class="floating-icon inline-block mb-4">
+                    <i class="fas fa-music text-6xl text-white opacity-80"></i>
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 glow-text">Predictoren</h1>
+                <p class="text-xl text-white/80 max-w-2xl mx-auto">Harness the power of data to predict ROI, break-even timelines, and profitability for your music investments</p>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                <div class="xl:col-span-1">
+                    <div class="glass-strong rounded-2xl p-8 sticky top-8">
+                        <div class="flex items-center justify-center mb-8">
+                            <i class="fas fa-sliders-h text-2xl text-white mr-3"></i>
+                            <h2 class="text-2xl font-bold text-white">Track Configuration</h2>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-tag mr-2"></i>Song Title</label>
+                                <input type="text" id="songTitle" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white/50 text-center" placeholder="Enter your track name">
+                            </div>
+
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-coins mr-2"></i>Currency</label>
+                                <select id="currency" class="input-field w-full px-4 py-3 rounded-xl text-white text-center">
+                                    <option value="DKK" selected>DKK (Danish Krone)</option>
+                                    <option value="USD">USD (US Dollar)</option>
+                                    <option value="EUR">EUR (Euro)</option>
+                                    <option value="GBP">GBP (British Pound)</option>
+                                    <option value="BRL">BRL (Brazilian Real)</option>
+                                </select>
+                            </div>
+
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-dollar-sign mr-2"></i>Investment Amount</label>
+                                <input type="number" id="investment" value="50000" class="input-field w-full px-4 py-3 rounded-xl text-white text-center">
+                            </div>
+
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-guitar mr-2"></i>Genre</label>
+                                <select id="genre" class="input-field w-full px-4 py-3 rounded-xl text-white text-center">
+                                    <option value="Brazilian Funk" selected>Brazilian Funk</option>
+                                    <option value="Phonk">Phonk</option>
+                                    <option value="Hip-Hop">Hip-Hop</option>
+                                    <option value="Pop">Pop</option>
+                                    <option value="Drum & Bass">Drum & Bass</option>
+                                    <option value="Techno">Techno</option>
+                                    <option value="House">House</option>
+                                    <option value="Electronic">Electronic</option>
+                                </select>
+                            </div>
+
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fab fa-spotify mr-2"></i>Daily Spotify Streams</label>
+                                <input type="number" id="dailyStreams" value="10000" class="input-field w-full px-4 py-3 rounded-xl text-white text-center">
+                            </div>
+
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-globe mr-2"></i>Target Markets (with weights)</label>
+                                <div id="selectedMarkets" class="flex flex-col gap-2 mb-3"></div>
+                                <select id="marketSelect" class="input-field w-full px-4 py-3 rounded-xl text-white text-center">
+                                    <option value="">-- Select a country to add --</option>
+                                </select>
+                                <p id="weightWarning" class="text-yellow-400 text-xs mt-2" style="display:none;">Warning: Weights should total 100%</p>
+                            </div>
+
+                            <div class="text-center bg-white/5 rounded-xl p-4">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-file-contract mr-2"></i>Publishing Rights</label>
+                                <div class="flex items-center justify-center gap-3 mb-3">
+                                    <input type="checkbox" id="publishingEnabled" style="width:20px;height:20px;cursor:pointer;">
+                                    <span class="text-white">Include Publishing</span>
+                                </div>
+                                <div id="publishingOptions" style="display:none;" class="mt-3">
+                                    <div class="flex flex-col gap-2">
+                                        <label class="flex items-center justify-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/10">
+                                            <input type="radio" name="pubShare" value="100" checked style="width:18px;height:18px;cursor:pointer;">
+                                            <span class="text-white text-sm">100% Publishing <span class="text-green-400">(+5% revenue)</span></span>
+                                        </label>
+                                        <label class="flex items-center justify-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/10">
+                                            <input type="radio" name="pubShare" value="50" style="width:18px;height:18px;cursor:pointer;">
+                                            <span class="text-white text-sm">50% Publishing <span class="text-green-400">(+2.5% revenue)</span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <label class="block text-white/90 font-medium mb-3"><i class="fas fa-chart-line mr-2"></i>Growth Scenario</label>
+                                <select id="upside" class="input-field w-full px-4 py-3 rounded-xl text-white text-center">
+                                    <option value="decreasing">Decreasing Streams</option>
+                                    <option value="stable" selected>Stable Performance</option>
+                                    <option value="small_upside">Small Upside (1.25x peak)</option>
+                                    <option value="big_upside">Big Upside (2.5x peak)</option>
+                                </select>
+                            </div>
+
+                            <button id="calculateBtn" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-bold text-lg shadow-lg flex items-center justify-center space-x-3">
+                                <i class="fas fa-calculator"></i>
+                                <span>Predict Profitability</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resultsPanel" class="xl:col-span-3" style="display: none;">
+                    <div id="revenueChartSection" class="glass-strong rounded-2xl p-8 mb-6">
+                        <div class="flex items-center justify-center mb-8">
+                            <i class="fas fa-chart-line text-2xl text-white mr-3"></i>
+                            <h2 class="text-2xl font-bold text-white">Revenue Development Timeline</h2>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-6">
+                            <canvas id="revenueChartCanvas" height="200"></canvas>
+                        </div>
+                        <div class="mt-6 flex items-center justify-center space-x-8 text-sm">
+                            <div class="flex items-center"><div class="w-6 h-1 bg-gradient-to-r from-green-400 to-emerald-600 rounded mr-2"></div><span class="text-white/80">Cumulative Revenue</span></div>
+                            <div class="flex items-center"><div class="w-6 h-1 border-t-2 border-dashed border-red-400 mr-2"></div><span class="text-white/80">Investment Amount</span></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-strong rounded-2xl p-8 mb-6">
+                        <div class="flex items-center justify-center mb-6">
+                            <i class="fas fa-tags text-2xl text-green-400 mr-2"></i>
+                            <h3 class="text-xl font-bold text-white">Maximum Purchase Price by Break-even Target</h3>
+                        </div>
+                        <p class="text-white/70 text-sm text-center mb-6">Based on your stream projections, here's the maximum you should pay to break even within each timeframe:</p>
+                        <div id="breakEvenPrices" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                    </div>
+
+                    <div class="glass-strong rounded-2xl p-8 mb-6">
+                        <div class="flex items-center justify-center mb-6">
+                            <i class="fas fa-info-circle text-2xl text-blue-400 mr-2"></i>
+                            <h3 class="text-xl font-bold text-white">Historical Performance Pattern</h3>
+                        </div>
+                        <p id="decayInfoText" class="text-white/80 text-sm leading-relaxed text-center mb-6"></p>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <canvas id="declineChartCanvas" height="150"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-strong rounded-2xl p-8 mb-8">
+                        <div class="flex items-center justify-center mb-8">
+                            <i class="fas fa-chart-pie text-2xl text-white mr-3"></i>
+                            <h2 class="text-2xl font-bold text-white">AI-Powered Predictions</h2>
+                        </div>
+                        <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+
+                    <div class="glass-strong rounded-2xl p-8 mb-8">
+                        <div class="flex items-center justify-center mb-6">
+                            <i class="fas fa-broadcast-tower text-2xl text-white mr-3"></i>
+                            <h3 class="text-xl font-bold text-white">Revenue Stream Analysis</h3>
+                        </div>
+                        <div id="platformGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="monthlyTable" class="mt-8 glass-strong rounded-2xl p-8" style="display: none;">
+                <div class="flex items-center justify-center mb-8">
+                    <i class="fas fa-calendar-alt text-2xl text-white mr-3"></i>
+                    <h2 class="text-2xl font-bold text-white">Monthly Performance Forecast</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-white">
+                        <thead>
+                            <tr class="border-b-2 border-white/20">
+                                <th class="text-center py-4 px-3">Month</th>
+                                <th class="text-center py-4 px-3">Streams</th>
+                                <th class="text-center py-4 px-3">Monthly Revenue</th>
+                                <th class="text-center py-4 px-3">Cumulative Revenue</th>
+                                <th class="text-center py-4 px-3">Profit/Loss</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bar">Property of The Label Sunday ApS. Developed by Viktor Radmer in Copenhagen K, 2025</div>
+
+    <script>
+        // Currency conversion rates TO DKK
+        var currencyRates = { 'DKK': 1, 'USD': 7.05, 'EUR': 7.46, 'GBP': 8.85, 'BRL': 1.18 };
+        var currencySymbols = { 'DKK': 'DKK', 'USD': '$', 'EUR': '€', 'GBP': '£', 'BRL': 'R$' };
+
+        // Complete Spotify country rates (DKK)
+        var spotifyRates = {
+            'AD': 0.0242, 'AE': 0.0075, 'AG': 0.0185, 'AL': 0.0039, 'AM': 0.0041, 'AO': 0.0024,
+            'AR': 0.0041, 'AT': 0.0208, 'AU': 0.0193, 'AZ': 0.0045, 'BA': 0.0047, 'BB': 0.0035,
+            'BD': 0.0020, 'BE': 0.0187, 'BF': 0.0030, 'BG': 0.0053, 'BH': 0.0078, 'BI': 0.0030,
+            'BJ': 0.0030, 'BN': 0.0052, 'BO': 0.0042, 'BR': 0.0067, 'BS': 0.0028, 'BT': 0.0041,
+            'BW': 0.0024, 'BY': 0.0056, 'BZ': 0.0042, 'CA': 0.0167, 'CD': 0.0028, 'CG': 0.0028,
+            'CI': 0.0021, 'CL': 0.0054, 'CM': 0.0024, 'CO': 0.0045, 'CR': 0.0076,
+            'CV': 0.0098, 'CY': 0.0136, 'CZ': 0.0110, 'DE': 0.0209, 'DJ': 0.0109, 'DK': 0.0268,
+            'DM': 0.0180, 'DO': 0.0053, 'DZ': 0.0040, 'EC': 0.0077, 'EE': 0.0142, 'EG': 0.0016,
+            'ET': 0.0024, 'FI': 0.0244, 'FJ': 0.0069, 'FR': 0.0151, 'GA': 0.0030, 'GB': 0.0283,
+            'GD': 0.0169, 'GE': 0.0061, 'GH': 0.0017, 'GM': 0.0030, 'GN': 0.0024, 'GQ': 0.0029,
+            'GR': 0.0085, 'GT': 0.0033, 'HR': 0.0068, 'HU': 0.0084, 'ID': 0.0015, 'IE': 0.0244,
+            'IL': 0.0120, 'IN': 0.0060, 'IQ': 0.0055, 'IS': 0.0346, 'IT': 0.0122, 'JM': 0.0021,
+            'JP': 0.0121, 'JO': 0.0026, 'KE': 0.0021, 'KG': 0.0034, 'KH': 0.0027, 'KM': 0.0030,
+            'KW': 0.0083, 'KZ': 0.0028, 'LA': 0.0027, 'LB': 0.0088, 'LI': 0.0404, 'LK': 0.0227,
+            'LR': 0.0040, 'LS': 0.0030, 'LT': 0.0102, 'LU': 0.0196, 'LV': 0.0097, 'LY': 0.0029,
+            'MA': 0.0031, 'MD': 0.0064, 'MG': 0.0087, 'MK': 0.0036, 'ML': 0.0024,
+            'MN': 0.0023, 'MR': 0.0029, 'MT': 0.0119, 'MU': 0.0023, 'MV': 0.0048, 'MW': 0.0030,
+            'MX': 0.0069, 'MY': 0.0058, 'MZ': 0.0030, 'NA': 0.0038, 'NE': 0.0030, 'NG': 0.0010,
+            'NI': 0.0031, 'NL': 0.0242, 'NO': 0.0268, 'NP': 0.0041, 'NZ': 0.0202, 'OM': 0.0083,
+            'PA': 0.0057, 'PE': 0.0032, 'PG': 0.0048, 'PH': 0.0031, 'PK': 0.0015, 'PL': 0.0081,
+            'PS': 0.0061, 'PT': 0.0096, 'PY': 0.0031, 'QA': 0.0073, 'RO': 0.0058, 'RS': 0.0048,
+            'RW': 0.0012, 'SA': 0.0077, 'SC': 0.0164, 'SE': 0.0247, 'SG': 0.0136,
+            'SI': 0.0086, 'SK': 0.0098, 'SL': 0.0030, 'SN': 0.0030, 'SR': 0.0041, 'SV': 0.0033,
+            'SZ': 0.0032, 'TD': 0.0064, 'TH': 0.0024, 'TL': 0.0067, 'TN': 0.0040, 'TO': 0.0068,
+            'TR': 0.0030, 'TT': 0.0011, 'TW': 0.0054, 'TZ': 0.0024, 'UA': 0.0047, 'UG': 0.0033,
+            'US': 0.0251, 'UY': 0.0069, 'UZ': 0.0021, 'VE': 0.0035, 'VN': 0.0016, 'VU': 0.0069,
+            'ZA': 0.0055, 'ZM': 0.0019, 'ZW': 0.0031
+        };
+
+        var countryNames = {
+            'AD': 'Andorra', 'AE': 'UAE', 'AG': 'Antigua', 'AL': 'Albania', 'AM': 'Armenia', 'AO': 'Angola',
+            'AR': 'Argentina', 'AT': 'Austria', 'AU': 'Australia', 'AZ': 'Azerbaijan', 'BA': 'Bosnia', 'BB': 'Barbados',
+            'BD': 'Bangladesh', 'BE': 'Belgium', 'BF': 'Burkina Faso', 'BG': 'Bulgaria', 'BH': 'Bahrain', 'BI': 'Burundi',
+            'BJ': 'Benin', 'BN': 'Brunei', 'BO': 'Bolivia', 'BR': 'Brazil', 'BS': 'Bahamas', 'BT': 'Bhutan',
+            'BW': 'Botswana', 'BY': 'Belarus', 'BZ': 'Belize', 'CA': 'Canada', 'CD': 'Congo DRC', 'CG': 'Congo',
+            'CI': 'Ivory Coast', 'CL': 'Chile', 'CM': 'Cameroon', 'CO': 'Colombia', 'CR': 'Costa Rica',
+            'CV': 'Cape Verde', 'CY': 'Cyprus', 'CZ': 'Czechia', 'DE': 'Germany', 'DJ': 'Djibouti', 'DK': 'Denmark',
+            'DM': 'Dominica', 'DO': 'Dominican Rep', 'DZ': 'Algeria', 'EC': 'Ecuador', 'EE': 'Estonia', 'EG': 'Egypt',
+            'ET': 'Ethiopia', 'FI': 'Finland', 'FJ': 'Fiji', 'FR': 'France', 'GA': 'Gabon', 'GB': 'United Kingdom',
+            'GD': 'Grenada', 'GE': 'Georgia', 'GH': 'Ghana', 'GM': 'Gambia', 'GN': 'Guinea', 'GQ': 'Eq Guinea',
+            'GR': 'Greece', 'GT': 'Guatemala', 'HR': 'Croatia', 'HU': 'Hungary', 'ID': 'Indonesia', 'IE': 'Ireland',
+            'IL': 'Israel', 'IN': 'India', 'IQ': 'Iraq', 'IS': 'Iceland', 'IT': 'Italy', 'JM': 'Jamaica',
+            'JP': 'Japan', 'JO': 'Jordan', 'KE': 'Kenya', 'KG': 'Kyrgyzstan', 'KH': 'Cambodia', 'KM': 'Comoros',
+            'KW': 'Kuwait', 'KZ': 'Kazakhstan', 'LA': 'Laos', 'LB': 'Lebanon', 'LI': 'Liechtenstein', 'LK': 'Sri Lanka',
+            'LR': 'Liberia', 'LS': 'Lesotho', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'LV': 'Latvia', 'LY': 'Libya',
+            'MA': 'Morocco', 'MD': 'Moldova', 'MG': 'Madagascar', 'MK': 'N Macedonia', 'ML': 'Mali',
+            'MN': 'Mongolia', 'MR': 'Mauritania', 'MT': 'Malta', 'MU': 'Mauritius', 'MV': 'Maldives', 'MW': 'Malawi',
+            'MX': 'Mexico', 'MY': 'Malaysia', 'MZ': 'Mozambique', 'NA': 'Namibia', 'NE': 'Niger', 'NG': 'Nigeria',
+            'NI': 'Nicaragua', 'NL': 'Netherlands', 'NO': 'Norway', 'NP': 'Nepal', 'NZ': 'New Zealand', 'OM': 'Oman',
+            'PA': 'Panama', 'PE': 'Peru', 'PG': 'Papua NG', 'PH': 'Philippines', 'PK': 'Pakistan', 'PL': 'Poland',
+            'PS': 'Palestine', 'PT': 'Portugal', 'PY': 'Paraguay', 'QA': 'Qatar', 'RO': 'Romania', 'RS': 'Serbia',
+            'RW': 'Rwanda', 'SA': 'Saudi Arabia', 'SC': 'Seychelles', 'SE': 'Sweden', 'SG': 'Singapore', 'SI': 'Slovenia',
+            'SK': 'Slovakia', 'SL': 'Sierra Leone', 'SN': 'Senegal', 'SR': 'Suriname', 'SV': 'El Salvador', 'SZ': 'Eswatini',
+            'TD': 'Chad', 'TH': 'Thailand', 'TL': 'Timor-Leste', 'TN': 'Tunisia', 'TO': 'Tonga', 'TR': 'Turkey',
+            'TT': 'Trinidad', 'TW': 'Taiwan', 'TZ': 'Tanzania', 'UA': 'Ukraine', 'UG': 'Uganda', 'US': 'United States',
+            'UY': 'Uruguay', 'UZ': 'Uzbekistan', 'VE': 'Venezuela', 'VN': 'Vietnam', 'VU': 'Vanuatu', 'ZA': 'South Africa',
+            'ZM': 'Zambia', 'ZW': 'Zimbabwe', 'ROW': 'Rest of World'
+        };
+
+        var countryFlags = {
+            'AD': '🇦🇩', 'AE': '🇦🇪', 'AG': '🇦🇬', 'AL': '🇦🇱', 'AM': '🇦🇲', 'AO': '🇦🇴', 'AR': '🇦🇷', 'AT': '🇦🇹',
+            'AU': '🇦🇺', 'AZ': '🇦🇿', 'BA': '🇧🇦', 'BB': '🇧🇧', 'BD': '🇧🇩', 'BE': '🇧🇪', 'BF': '🇧🇫', 'BG': '🇧🇬',
+            'BH': '🇧🇭', 'BI': '🇧🇮', 'BJ': '🇧🇯', 'BN': '🇧🇳', 'BO': '🇧🇴', 'BR': '🇧🇷', 'BS': '🇧🇸', 'BT': '🇧🇹',
+            'BW': '🇧🇼', 'BY': '🇧🇾', 'BZ': '🇧🇿', 'CA': '🇨🇦', 'CD': '🇨🇩', 'CG': '🇨🇬', 'CI': '🇨🇮',
+            'CL': '🇨🇱', 'CM': '🇨🇲', 'CO': '🇨🇴', 'CR': '🇨🇷', 'CV': '🇨🇻', 'CY': '🇨🇾', 'CZ': '🇨🇿', 'DE': '🇩🇪',
+            'DJ': '🇩🇯', 'DK': '🇩🇰', 'DM': '🇩🇲', 'DO': '🇩🇴', 'DZ': '🇩🇿', 'EC': '🇪🇨', 'EE': '🇪🇪', 'EG': '🇪🇬',
+            'ET': '🇪🇹', 'FI': '🇫🇮', 'FJ': '🇫🇯', 'FR': '🇫🇷', 'GA': '🇬🇦', 'GB': '🇬🇧', 'GD': '🇬🇩', 'GE': '🇬🇪',
+            'GH': '🇬🇭', 'GM': '🇬🇲', 'GN': '🇬🇳', 'GQ': '🇬🇶', 'GR': '🇬🇷', 'GT': '🇬🇹', 'HR': '🇭🇷', 'HU': '🇭🇺',
+            'ID': '🇮🇩', 'IE': '🇮🇪', 'IL': '🇮🇱', 'IN': '🇮🇳', 'IQ': '🇮🇶', 'IS': '🇮🇸', 'IT': '🇮🇹', 'JM': '🇯🇲',
+            'JP': '🇯🇵', 'JO': '🇯🇴', 'KE': '🇰🇪', 'KG': '🇰🇬', 'KH': '🇰🇭', 'KM': '🇰🇲', 'KW': '🇰🇼', 'KZ': '🇰🇿',
+            'LA': '🇱🇦', 'LB': '🇱🇧', 'LI': '🇱🇮', 'LK': '🇱🇰', 'LR': '🇱🇷', 'LS': '🇱🇸', 'LT': '🇱🇹', 'LU': '🇱🇺',
+            'LV': '🇱🇻', 'LY': '🇱🇾', 'MA': '🇲🇦', 'MD': '🇲🇩', 'MG': '🇲🇬', 'MK': '🇲🇰', 'ML': '🇲🇱',
+            'MN': '🇲🇳', 'MR': '🇲🇷', 'MT': '🇲🇹', 'MU': '🇲🇺', 'MV': '🇲🇻', 'MW': '🇲🇼', 'MX': '🇲🇽', 'MY': '🇲🇾',
+            'MZ': '🇲🇿', 'NA': '🇳🇦', 'NE': '🇳🇪', 'NG': '🇳🇬', 'NI': '🇳🇮', 'NL': '🇳🇱', 'NO': '🇳🇴', 'NP': '🇳🇵',
+            'NZ': '🇳🇿', 'OM': '🇴🇲', 'PA': '🇵🇦', 'PE': '🇵🇪', 'PG': '🇵🇬', 'PH': '🇵🇭', 'PK': '🇵🇰', 'PL': '🇵🇱',
+            'PS': '🇵🇸', 'PT': '🇵🇹', 'PY': '🇵🇾', 'QA': '🇶🇦', 'RO': '🇷🇴', 'RS': '🇷🇸', 'RW': '🇷🇼', 'SA': '🇸🇦',
+            'SC': '🇸🇨', 'SE': '🇸🇪', 'SG': '🇸🇬', 'SI': '🇸🇮', 'SK': '🇸🇰', 'SL': '🇸🇱', 'SN': '🇸🇳', 'SR': '🇸🇷',
+            'SV': '🇸🇻', 'SZ': '🇸🇿', 'TD': '🇹🇩', 'TH': '🇹🇭', 'TL': '🇹🇱', 'TN': '🇹🇳', 'TO': '🇹🇴', 'TR': '🇹🇷',
+            'TT': '🇹🇹', 'TW': '🇹🇼', 'TZ': '🇹🇿', 'UA': '🇺🇦', 'UG': '🇺🇬', 'US': '🇺🇸', 'UY': '🇺🇾', 'UZ': '🇺🇿',
+            'VE': '🇻🇪', 'VN': '🇻🇳', 'VU': '🇻🇺', 'ZA': '🇿🇦', 'ZM': '🇿🇲', 'ZW': '🇿🇼', 'ROW': '🌍'
+        };
+
+        var genreMultipliers = { 'Brazilian Funk': 1.08, 'Phonk': 1.15, 'Hip-Hop': 1.08, 'Pop': 1.10, 'Drum & Bass': 1.05, 'Techno': 1.02, 'House': 1.02, 'Electronic': 1.00 };
+        // Platform distribution for display (Spotify = 100/135 ≈ 74%, Others = 35/135 ≈ 26%)
+        // This reflects: Spotify revenue + 35% additional from other platforms
+        // Platform distribution - Spotify accounts for 65% of total revenue
+        // Other platforms account for 35% of total revenue
+        var platformDistribution = { 
+            'Spotify': 0.65,
+            'Other Platforms': 0.35
+        };
+        var platformIcons = { 'Spotify': 'fab fa-spotify', 'Other Platforms': 'fas fa-music' };
+        
+        // COMPREHENSIVE REVENUE-BASED DECAY RATES (21 tracks analyzed)
+        var genreDecayRates = {
+            'Brazilian Funk': 0.150, 'Phonk': 0.090, 'Hip-Hop': 0.090, 'Pop': 0.070,
+            'Electronic': 0.025, 'House': 0.030, 'Techno': 0.030, 'Drum & Bass': 0.025
+        };
+        
+        var upsideScenarios = {
+            'decreasing': { multiplier: 0.6, peakMonth: 2 },
+            'stable': { multiplier: 0.85, peakMonth: 3 },
+            'small_upside': { multiplier: 1.25, peakMonth: 3 },
+            'big_upside': { multiplier: 2.5, peakMonth: 5 }
+        };
+
+        // Market weights - default Brazil 50%, US 50%
+        var marketWeights = { 'BR': 50, 'US': 50 };
+        
+        // Calculate ROW average rate
+        function getROWRate() {
+            var total = 0, count = 0;
+            for (var code in spotifyRates) {
+                if (spotifyRates[code] > 0) { total += spotifyRates[code]; count++; }
+            }
+            return count > 0 ? total / count : 0.015;
+        }
+        var ROW_RATE = getROWRate();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populateMarketDropdown();
+            updateMarketDisplay();
+            
+            document.getElementById('publishingEnabled').addEventListener('change', function() {
+                document.getElementById('publishingOptions').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('marketSelect').addEventListener('change', function() {
+                var code = this.value;
+                if (code && !marketWeights.hasOwnProperty(code)) {
+                    var totalWeight = getTotalWeight();
+                    var remaining = 100 - totalWeight;
+                    marketWeights[code] = remaining > 0 ? Math.min(remaining, 20) : 10;
+                    updateMarketDisplay();
+                    populateMarketDropdown();
+                }
+                this.value = '';
+            });
+            
+            document.getElementById('calculateBtn').addEventListener('click', calculatePredictions);
+        });
+
+        function populateMarketDropdown() {
+            var sel = document.getElementById('marketSelect');
+            sel.innerHTML = '<option value="">-- Select a country to add --</option>';
+            
+            // Add ROW option first
+            if (!marketWeights.hasOwnProperty('ROW')) {
+                var rowOpt = document.createElement('option');
+                rowOpt.value = 'ROW';
+                rowOpt.textContent = '🌍 Rest of World (avg: ' + ROW_RATE.toFixed(4) + ' DKK)';
+                sel.appendChild(rowOpt);
+            }
+            
+            // Sort alphabetically by name
+            var sorted = Object.keys(spotifyRates).filter(function(code) {
+                return spotifyRates[code] > 0 && !marketWeights.hasOwnProperty(code);
+            }).sort(function(a, b) {
+                return (countryNames[a] || a).localeCompare(countryNames[b] || b);
+            });
+            
+            for (var i = 0; i < sorted.length; i++) {
+                var code = sorted[i];
+                var opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = (countryFlags[code] || '') + ' ' + (countryNames[code] || code) + ' (' + spotifyRates[code].toFixed(4) + ' DKK)';
+                sel.appendChild(opt);
+            }
+        }
+
+        function getTotalWeight() {
+            var total = 0;
+            for (var key in marketWeights) { total += marketWeights[key]; }
+            return total;
+        }
+
+        function updateMarketDisplay() {
+            var container = document.getElementById('selectedMarkets');
+            var warning = document.getElementById('weightWarning');
+            var total = getTotalWeight();
+            warning.style.display = (total !== 100 && Object.keys(marketWeights).length > 0) ? 'block' : 'none';
+            
+            var html = '';
+            for (var code in marketWeights) {
+                var weight = marketWeights[code];
+                var flag = countryFlags[code] || '🌍';
+                var name = countryNames[code] || code;
+                var rate = code === 'ROW' ? ROW_RATE : (spotifyRates[code] || 0);
+                
+                html += '<div class="market-tag px-3 py-2 rounded-xl flex items-center justify-between gap-2">';
+                html += '<span class="flex items-center gap-2"><span>' + flag + '</span><span class="text-sm font-medium">' + name + '</span>';
+                html += '<span class="text-xs opacity-75">(' + rate.toFixed(4) + ' DKK)</span></span>';
+                html += '<div class="flex items-center gap-2">';
+                html += '<input type="number" value="' + weight + '" min="1" max="100" data-country="' + code + '" class="bg-white/20 border border-white/30 px-2 py-1 rounded-lg text-white text-sm text-center" style="width:60px;">';
+                html += '<span class="text-xs">%</span>';
+                html += '<button data-remove="' + code + '" class="text-white/70 hover:text-white ml-1"><i class="fas fa-times"></i></button>';
+                html += '</div></div>';
+            }
+            container.innerHTML = html;
+            
+            // Weight input listeners
+            var inputs = container.querySelectorAll('input[data-country]');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].addEventListener('change', function() {
+                    var c = this.getAttribute('data-country');
+                    marketWeights[c] = Math.max(1, Math.min(100, parseInt(this.value) || 1));
+                    updateMarketDisplay();
+                });
+            }
+            
+            // Remove button listeners
+            var btns = container.querySelectorAll('[data-remove]');
+            for (var j = 0; j < btns.length; j++) {
+                btns[j].addEventListener('click', function() {
+                    delete marketWeights[this.getAttribute('data-remove')];
+                    updateMarketDisplay();
+                    populateMarketDropdown();
+                });
+            }
+        }
+
+        function convertFromDKK(amount, currency) { return amount / currencyRates[currency]; }
+        function convertToDKK(amount, currency) { return amount * currencyRates[currency]; }
+        function formatCurrency(amount, currency) {
+            var sym = currencySymbols[currency];
+            var rounded = Math.round(amount);
+            return currency === 'DKK' ? rounded.toLocaleString() + ' DKK' : sym + rounded.toLocaleString();
+        }
+
+        function calculatePredictions() {
+            var btn = document.getElementById('calculateBtn');
+            btn.innerHTML = '<div class="loading-spinner"></div><span style="margin-left:8px;">Calculating...</span>';
+            btn.disabled = true;
+            setTimeout(function() {
+                performCalculation();
+                btn.innerHTML = '<i class="fas fa-calculator"></i><span style="margin-left:8px;">Predict Profitability</span><i class="fas fa-arrow-right" style="margin-left:8px;"></i>';
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        function performCalculation() {
+            var songTitle = document.getElementById('songTitle').value || 'Untitled Track';
+            var currency = document.getElementById('currency').value;
+            var investmentInput = parseFloat(document.getElementById('investment').value) || 50000;
+            var investmentDKK = convertToDKK(investmentInput, currency);
+            var genre = document.getElementById('genre').value;
+            var dailyStreams = parseFloat(document.getElementById('dailyStreams').value) || 10000;
+            var upsideLevel = document.getElementById('upside').value;
+            
+            var publishingEnabled = document.getElementById('publishingEnabled').checked;
+            var publishingShare = 100;
+            if (publishingEnabled) {
+                var checked = document.querySelector('input[name="pubShare"]:checked');
+                publishingShare = checked ? parseInt(checked.value) : 100;
+            }
+
+            // Weighted Spotify rate
+            var totalWeight = getTotalWeight();
+            var spotifyRate = 0;
+            if (totalWeight > 0) {
+                for (var code in marketWeights) {
+                    var rate = code === 'ROW' ? ROW_RATE : (spotifyRates[code] || 0.015);
+                    spotifyRate += rate * (marketWeights[code] / totalWeight);
+                }
+            } else {
+                spotifyRate = ROW_RATE;
+            }
+
+            var genreMultiplier = genreMultipliers[genre] || 1.0;
+            var effectiveSpotifyRate = spotifyRate * genreMultiplier;
+            
+            // Total revenue = Spotify revenue / 0.65 (Spotify is 65% of total)
+            // This means: Total = Spotify × 1.538 (or Spotify + 53.8% for other platforms)
+            var totalRevenuePerStream = effectiveSpotifyRate / 0.65;
+            
+            // Publishing bonus
+            var publishingBonus = publishingEnabled ? (publishingShare === 100 ? 0.05 : 0.025) : 0;
+            var finalRevenuePerStream = totalRevenuePerStream * (1 + publishingBonus);
+
+            var scenario = upsideScenarios[upsideLevel];
+            var decayRate = genreDecayRates[genre] || 0.090;
+
+            var monthlyData = [];
+            var cumulativeRevenue = 0;
+            var breakEvenMonth = null;
+
+            for (var month = 1; month <= 36; month++) {
+                var streamMultiplier = 1;
+                if (month <= scenario.peakMonth) {
+                    streamMultiplier = 1 + ((scenario.multiplier - 1) * (month / scenario.peakMonth));
+                } else {
+                    streamMultiplier = scenario.multiplier * Math.pow(1 - decayRate, month - scenario.peakMonth);
+                }
+                var monthlyStreams = dailyStreams * 30 * streamMultiplier;
+                var monthlyRevenue = monthlyStreams * finalRevenuePerStream;
+                cumulativeRevenue += monthlyRevenue;
+                if (!breakEvenMonth && cumulativeRevenue >= investmentDKK) breakEvenMonth = month;
+                monthlyData.push({
+                    month: month,
+                    monthlyStreams: Math.round(monthlyStreams),
+                    monthlyRevenue: Math.round(monthlyRevenue),
+                    cumulativeRevenue: Math.round(cumulativeRevenue),
+                    profit: Math.round(cumulativeRevenue - investmentDKK)
+                });
+            }
+
+            var finalROI = ((cumulativeRevenue / investmentDKK) - 1) * 100;
+            var totalStreams = 0;
+            for (var i = 0; i < monthlyData.length; i++) totalStreams += monthlyData[i].monthlyStreams;
+
+            var priceAssessment = 'normal';
+            var ratio = investmentDKK / cumulativeRevenue;
+            if (ratio < 0.4) priceAssessment = 'excellent';
+            else if (ratio < 0.6) priceAssessment = 'good';
+            else if (ratio < 0.85) priceAssessment = 'normal';
+            else if (ratio < 1.1) priceAssessment = 'high';
+            else priceAssessment = 'very_high';
+
+            displayResults({
+                songTitle: songTitle, investment: investmentDKK, currency: currency,
+                breakEvenMonth: breakEvenMonth, finalROI: finalROI, totalStreams: totalStreams,
+                priceAssessment: priceAssessment, spotifyRate: spotifyRate,
+                finalRevenuePerStream: finalRevenuePerStream, finalRevenue: Math.round(cumulativeRevenue),
+                isProfitable: finalROI > 0, monthlyData: monthlyData, genre: genre,
+                publishingEnabled: publishingEnabled, publishingShare: publishingShare,
+                breakEvenPrices: {
+                    month3: monthlyData[2] ? monthlyData[2].cumulativeRevenue : 0,
+                    month6: monthlyData[5] ? monthlyData[5].cumulativeRevenue : 0,
+                    month9: monthlyData[8] ? monthlyData[8].cumulativeRevenue : 0,
+                    month12: monthlyData[11] ? monthlyData[11].cumulativeRevenue : 0
+                }
+            });
+        }
+
+        function displayResults(p) {
+            document.getElementById('resultsPanel').style.display = 'block';
+            document.getElementById('monthlyTable').style.display = 'block';
+
+            // Display break-even prices
+            var breakEvenHtml = '';
+            var targets = [
+                { months: 3, revenue: p.breakEvenPrices.month3, icon: 'fa-rocket', color: 'from-green-500 to-emerald-500' },
+                { months: 6, revenue: p.breakEvenPrices.month6, icon: 'fa-bolt', color: 'from-emerald-500 to-teal-500' },
+                { months: 9, revenue: p.breakEvenPrices.month9, icon: 'fa-chart-line', color: 'from-teal-500 to-cyan-500' },
+                { months: 12, revenue: p.breakEvenPrices.month12, icon: 'fa-check-circle', color: 'from-cyan-500 to-blue-500' }
+            ];
+            
+            for (var i = 0; i < targets.length; i++) {
+                var t = targets[i];
+                var priceConverted = convertFromDKK(t.revenue, p.currency);
+                var isAffordable = t.revenue >= p.investment;
+                breakEvenHtml += '<div class="relative overflow-hidden rounded-xl p-5 bg-gradient-to-br ' + t.color + '">';
+                breakEvenHtml += '<div class="absolute top-2 right-2 opacity-20"><i class="fas ' + t.icon + ' text-4xl text-white"></i></div>';
+                breakEvenHtml += '<div class="text-white/90 text-sm font-medium mb-1">' + t.months + ' Month Break-even</div>';
+                breakEvenHtml += '<div class="text-2xl font-bold text-white">' + formatCurrency(priceConverted, p.currency) + '</div>';
+                breakEvenHtml += '<div class="text-white/70 text-xs mt-2">Max purchase price</div>';
+                if (isAffordable) {
+                    breakEvenHtml += '<div class="mt-2 text-xs text-white/90 bg-white/20 rounded-full px-2 py-1 inline-block">✓ Your investment fits</div>';
+                }
+                breakEvenHtml += '</div>';
+            }
+            document.getElementById('breakEvenPrices').innerHTML = breakEvenHtml;
+
+            var genreDeclineInfo = {
+                'Brazilian Funk': 'Based on comprehensive analysis of Brazilian Funk tracks (ELA JOGA NA HORA, BIKE), revenue typically declines by <strong>86%</strong> within 12 months after peak. The 15% monthly decay is weighted by peak revenue.',
+                'Phonk': 'Phonk tracks show 9% monthly revenue decay with <strong>67%</strong> decline within 12 months after peak. Analyzed 11 tracks including COLLAR (42% weight), TREN, SEVERA, STARGAZER.',
+                'Hip-Hop': 'Hip-Hop tracks typically decline by <strong>67%</strong> within 12 months after reaching peak, following similar patterns to Phonk with approximately 9% monthly decay.',
+                'Pop': 'Pop tracks have good staying power, typically declining by <strong>57%</strong> within 12 months after peak (7% monthly) due to broader appeal and playlist longevity.',
+                'Electronic': 'Electronic music shows exceptional stability with only <strong>26%</strong> decline within 12 months (2.5% monthly decay). Based on 4 tracks including PARADISE (70% weight).',
+                'House': 'House tracks benefit from club play, showing strong stability with approximately <strong>31%</strong> decline within 12 months (3% monthly decay).',
+                'Techno': 'Techno tracks have excellent staying power, declining by approximately <strong>31%</strong> within 12 months after peak (3% monthly decay).',
+                'Drum & Bass': 'Drum & Bass tracks have exceptional stability, declining by only <strong>26%</strong> within 12 months after peak (2.5% monthly).'
+            };
+            document.getElementById('decayInfoText').innerHTML = genreDeclineInfo[p.genre] || genreDeclineInfo['Hip-Hop'];
+
+            var peakMonth = 0, maxStreams = 0;
+            for (var i = 0; i < p.monthlyData.length; i++) {
+                if (p.monthlyData[i].monthlyStreams > maxStreams) {
+                    maxStreams = p.monthlyData[i].monthlyStreams;
+                    peakMonth = i;
+                }
+            }
+            createDeclineChart(p, peakMonth);
+
+            var priceColors = { 'excellent': '#22c55e', 'good': '#84cc16', 'normal': '#eab308', 'high': '#f97316', 'very_high': '#ef4444' };
+            var priceTexts = { 'excellent': 'Excellent Deal', 'good': 'Good Price', 'normal': 'Fair Price', 'high': 'High Price', 'very_high': 'Very High Price' };
+            var publishingInfo = p.publishingEnabled ? '<div class="text-xs text-green-400 mt-1">+' + (p.publishingShare === 100 ? '5' : '2.5') + '% from publishing</div>' : '';
+
+            document.getElementById('results').innerHTML = 
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-music text-2xl text-blue-300 mr-3"></i><div class="text-white/70 text-sm">Track</div></div><div class="text-2xl font-bold text-white">' + p.songTitle + '</div></div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-certificate text-2xl text-yellow-400 mr-3"></i><div class="text-white/70 text-sm">Price Assessment</div></div><div class="status-badge px-4 py-2 rounded-full text-sm font-bold inline-block" style="background-color:' + priceColors[p.priceAssessment] + '">' + priceTexts[p.priceAssessment] + '</div></div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-chart-line text-2xl text-purple-400 mr-3"></i><div class="text-white/70 text-sm">Profitability</div></div><div class="status-badge px-4 py-2 rounded-full text-sm font-bold inline-block ' + (p.isProfitable ? 'bg-green-500' : 'bg-red-500') + '">' + (p.isProfitable ? '✅ PROFITABLE' : '❌ UNPROFITABLE') + '</div></div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-clock text-2xl text-orange-400 mr-3"></i><div class="text-white/70 text-sm">Break-even</div></div><div class="text-3xl font-bold text-white">' + (p.breakEvenMonth ? p.breakEvenMonth + ' months' : 'Never') + '</div><div class="text-sm text-white/60 mt-1">' + (p.breakEvenMonth ? (p.breakEvenMonth/12).toFixed(1) + ' years' : '') + '</div></div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-percentage text-2xl text-cyan-400 mr-3"></i><div class="text-white/70 text-sm">36-Month ROI</div></div><div class="text-3xl font-bold ' + (p.finalROI > 0 ? 'text-green-400' : 'text-red-400') + '">' + p.finalROI.toFixed(1) + '%</div></div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-coins text-2xl text-yellow-400 mr-3"></i><div class="text-white/70 text-sm">Total Revenue (36m)</div></div><div class="text-3xl font-bold text-white">' + formatCurrency(convertFromDKK(p.finalRevenue, p.currency), p.currency) + '</div>' + publishingInfo + '</div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fas fa-play text-2xl text-pink-400 mr-3"></i><div class="text-white/70 text-sm">Total Streams</div></div><div class="text-3xl font-bold text-white">' + p.totalStreams.toLocaleString() + '</div></div>' +
+                '<div class="metric-card rounded-xl p-6"><div class="flex items-center justify-center mb-3"><i class="fab fa-spotify text-2xl text-green-400 mr-3"></i><div class="text-white/70 text-sm">Weighted Spotify Rate</div></div><div class="text-2xl font-bold text-white">' + p.spotifyRate.toFixed(6) + ' DKK</div><div class="text-xs text-white/60 mt-1">Per stream (weighted)</div></div>';
+
+            var platformHtml = '';
+            for (var platform in platformDistribution) {
+                var pct = platformDistribution[platform] * 100;
+                var rev = p.finalRevenue * platformDistribution[platform];
+                platformHtml += '<div class="metric-card rounded-xl p-4 text-center"><div class="flex items-center justify-center mb-3"><i class="' + platformIcons[platform] + ' text-2xl text-white mr-2"></i><div class="text-white font-medium">' + platform + '</div></div><div class="text-xl font-bold text-white">' + pct.toFixed(1) + '%</div><div class="text-sm text-white/70">' + formatCurrency(convertFromDKK(rev, p.currency), p.currency) + '</div><div class="progress-bar h-2 rounded-full mt-2" style="width:' + pct + '%"></div></div>';
+            }
+            document.getElementById('platformGrid').innerHTML = platformHtml;
+
+            var tableHtml = '';
+            for (var m = 0; m < 12; m++) {
+                var d = p.monthlyData[m];
+                tableHtml += '<tr class="table-row border-b border-white/10"><td class="py-4 px-3 text-center">' + d.month + '</td><td class="py-4 px-3 text-center">' + d.monthlyStreams.toLocaleString() + '</td><td class="py-4 px-3 text-center">' + formatCurrency(convertFromDKK(d.monthlyRevenue, p.currency), p.currency) + '</td><td class="py-4 px-3 text-center">' + formatCurrency(convertFromDKK(d.cumulativeRevenue, p.currency), p.currency) + '</td><td class="py-4 px-3 text-center font-bold ' + (d.profit >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (d.profit >= 0 ? '+' : '') + formatCurrency(convertFromDKK(d.profit, p.currency), p.currency) + '</td></tr>';
+            }
+            document.getElementById('monthlyTableBody').innerHTML = tableHtml;
+
+            createRevenueChart(p);
+            document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        var declineChartInstance = null;
+        var revenueChartInstance = null;
+
+        function createDeclineChart(p, peakMonth) {
+            var ctx = document.getElementById('declineChartCanvas').getContext('2d');
+            if (declineChartInstance) declineChartInstance.destroy();
+            
+            var labels = [], data = [];
+            var peakStreams = p.monthlyData[peakMonth].monthlyStreams;
+            for (var i = 0; i <= 12 && (peakMonth + i) < p.monthlyData.length; i++) {
+                labels.push(i === 0 ? 'Peak' : '+' + i + 'm');
+                data.push((p.monthlyData[peakMonth + i].monthlyStreams / peakStreams) * 100);
+            }
+            
+            declineChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{ label: 'Stream Performance', data: data, borderColor: 'rgba(34, 197, 94, 1)', backgroundColor: 'rgba(34, 197, 94, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100, ticks: { callback: function(v) { return v + '%'; }, color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } } } }
+            });
+        }
+
+        function createRevenueChart(p) {
+            var ctx = document.getElementById('revenueChartCanvas').getContext('2d');
+            if (revenueChartInstance) revenueChartInstance.destroy();
+            
+            var labels = [], cumData = [], invData = [];
+            var invConverted = convertFromDKK(p.investment, p.currency);
+            var breakEvenIndex = -1;
+            
+            for (var i = 0; i < p.monthlyData.length; i++) {
+                labels.push(p.monthlyData[i].month);
+                cumData.push(convertFromDKK(p.monthlyData[i].cumulativeRevenue, p.currency));
+                invData.push(invConverted);
+                if (breakEvenIndex === -1 && p.monthlyData[i].cumulativeRevenue >= p.investment) {
+                    breakEvenIndex = i;
+                }
+            }
+            
+            // Create point colors and sizes arrays for break-even highlight
+            var pointColors = [];
+            var pointSizes = [];
+            for (var j = 0; j < cumData.length; j++) {
+                if (j === breakEvenIndex) {
+                    pointColors.push('#eab308');
+                    pointSizes.push(10);
+                } else {
+                    pointColors.push('rgba(34, 197, 94, 1)');
+                    pointSizes.push(0);
+                }
+            }
+            
+            revenueChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { 
+                            label: 'Cumulative Revenue', 
+                            data: cumData, 
+                            borderColor: 'rgba(34, 197, 94, 1)', 
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)', 
+                            borderWidth: 3, 
+                            fill: true, 
+                            tension: 0.4,
+                            pointBackgroundColor: pointColors,
+                            pointBorderColor: pointColors,
+                            pointRadius: pointSizes,
+                            pointHoverRadius: pointSizes.map(function(s) { return s > 0 ? 12 : 4; })
+                        },
+                        { label: 'Investment', data: invData, borderColor: '#ef4444', borderWidth: 2, borderDash: [10, 5], fill: false, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0 && context.dataIndex === breakEvenIndex) {
+                                        return 'Revenue: ' + currencySymbols[p.currency] + Math.round(context.parsed.y).toLocaleString() + ' 🎉 BREAK-EVEN!';
+                                    }
+                                    return context.dataset.label + ': ' + currencySymbols[p.currency] + Math.round(context.parsed.y).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { ticks: { color: '#fff', callback: function(v) { return currencySymbols[p.currency] + v.toLocaleString(); } }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
